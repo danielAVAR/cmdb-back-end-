@@ -1,0 +1,43 @@
+{
+  "name": "cmdb-back-end-",
+  "version": "1.0.0",
+  "description": "Back end de resenas de peliculas por medio de nodejs y express",
+  "keywords": [
+    "NodeJS",
+    "ExpressJS",
+    "MySQL",
+    "OPP"
+  ],
+  "homepage": "https://github.com/danielAVAR/cmdb-back-end-#readme",
+  "bugs": {
+    "url": "https://github.com/danielAVAR/cmdb-back-end-/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielAVAR/cmdb-back-end-.git"
+  },
+  "license": "ISC",
+  "author": "danielAVAR",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.24.6",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "semver": "^7.8.5",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
