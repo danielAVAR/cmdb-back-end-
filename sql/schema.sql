@@ -1,0 +1,106 @@
+CREATE DATABASE IF NOT EXISTS cmdb;
+
+USE cmdb;
+
+
+-- Usuarios
+CREATE TABLE users (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  email VARCHAR(120) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  administrator BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+
+-- Categorías
+CREATE TABLE categories (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  category_name VARCHAR(80) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+-- Películas
+CREATE TABLE movies (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  movie_name VARCHAR(100) NOT NULL UNIQUE,
+  overview VARCHAR(500) NOT NULL,
+  release_year SMALLINT UNSIGNED NOT NULL,
+  image_url VARCHAR(500) NULL,
+  status ENUM('pending', 'approved') NOT NULL DEFAULT 'pending',
+  runtime SMALLINT UNSIGNED NULL,
+  budget BIGINT UNSIGNED NULL,
+  gross_worldwide BIGINT UNSIGNED NULL,
+  rating_sum INT UNSIGNED NOT NULL DEFAULT 0,
+  rating_count INT UNSIGNED NOT NULL DEFAULT 0,
+  created_by INT UNSIGNED NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+-- Reseñas
+CREATE TABLE reviews (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  user_id INT UNSIGNED NOT NULL,
+  movie_id INT UNSIGNED NOT NULL,
+  title VARCHAR(150) NOT NULL,
+  comment VARCHAR(500) NOT NULL,
+  rating TINYINT UNSIGNED NOT NULL,
+  likes INT UNSIGNED NOT NULL DEFAULT 0,
+  dislikes INT UNSIGNED NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CHECK (rating BETWEEN 1 AND 10),
+  
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- 5. Reacciones likes y dislikes
+CREATE TABLE user_reactions (
+  user_id INT UNSIGNED NOT NULL,
+  review_id INT UNSIGNED NOT NULL,
+  reaction ENUM('like', 'dislike') NOT NULL,
+  PRIMARY KEY (user_id, review_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Relación muchos a muchos películas y categorías
+CREATE TABLE movie_categories (
+  movie_id INT UNSIGNED NOT NULL,
+  category_id INT UNSIGNED NOT NULL,
+  PRIMARY KEY (movie_id, category_id),
+  FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
+  FOREIGN KEY (category_id) REFERENCES categories(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE actors (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  actor_name VARCHAR(150) NOT NULL,
+  biography VARCHAR(500) NULL,
+  birthdate DATE NULL
+) ENGINE=InnoDB;
+
+
+CREATE TABLE directors (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  director_name VARCHAR(150) NOT NULL,
+  biography VARCHAR(500) NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE movie_actors (
+  movie_id INT UNSIGNED NOT NULL,
+  actor_id INT UNSIGNED NOT NULL,
+  PRIMARY KEY (movie_id, actor_id),
+  FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
+  FOREIGN KEY (actor_id) REFERENCES actors(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE movie_directors (
+  movie_id INT UNSIGNED NOT NULL,
+  director_id INT UNSIGNED NOT NULL,
+  PRIMARY KEY (movie_id, director_id),
+  FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
+  FOREIGN KEY (director_id) REFERENCES directors(id)
+) ENGINE=InnoDB;
