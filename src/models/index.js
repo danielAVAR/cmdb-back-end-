@@ -1,17 +1,7 @@
-import { directors } from './directors.model.js';
-import { catagories } from './category.model.js';
-import { actors } from './actors.model.js'
-import { movie } from './movie.model.js';
-import { review } from './review.model.js';
-import { users } from './review.model.js';
-import { user_reaction } from 'user_reaction.model.js'
-
-export {
-  movie,
-  directors,
-  catagories,
-  actors,
-  users,
-  review,
-  user_reaction
-}
+export { actors as ActorsModel } from './actors.model.js';
+export { catagories as CategoriesModel } from './category.model.js';
+export { directors as DirectorsModel } from './directors.model.js';
+export { movie as MoviesModel } from './movie.model.js';
+export { review as ReviewsModel } from './review.model.js';
+export { users as UsersModel } from './user.model.js';
+export { user_reaction as UserReactionsModel } from './user_reaction.model.js';

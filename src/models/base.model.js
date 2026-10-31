@@ -10,39 +10,43 @@ export default class BaseModel {
   get table(){ return this.#table };
   get dbConn(){ return this.#dbConn };
 
-  async create( data ){
-    try{
-      const fields = Object.keys(data);
-      const query = `INSERT INTO ${this.#table} ( ${ fields.join(', ') } ) VALUES ( ${ fields.map( f => '?').join(', ') } )`;
-      const [ result ] = await this.#dbConn.execute( query, fields.map( f => data[f] ));
-      return result.insertId;
-    } 
-    catch( err ){
-      console.log( err );
+  #assertFields(fields) {
+    if (!fields.length || fields.some((field) => !/^[a-z_]+$/.test(field))) {
+      throw new TypeError('Invalid database field');
     }
   }
 
-  async getAll(){
-    try{
-      const query = `SELECT * FROM ${ this.#table };`;
-      const [ result ] = await this.#dbConn.query( query );
-      return result;
-    }
-    catch( err ){
-      console.log( err );
-    }
+  async create(data) {
+    const fields = Object.keys(data);
+    this.#assertFields(fields);
+    const sql = `INSERT INTO ${this.#table} (${fields.join(', ')}) VALUES (${fields.map(() => '?').join(', ')})`;
+    const [result] = await this.#dbConn.execute(sql, fields.map((field) => data[field]));
+    return result.insertId;
   }
 
-  async getById( id ){
-    try{
-      const query = `SELECT * FROM ${ this.#table } WHERE id = ?;`;
-      const [ result ] = await this.#dbConn.execute( query, [ id ] );
-      return result[0];
-    }
-    catch( err ){
-      console.log( err );
-    }
+  async getAll() {
+    const [rows] = await this.#dbConn.query(`SELECT * FROM ${this.#table}`);
+    return rows;
   }
 
+  async getById(id) {
+    const [rows] = await this.#dbConn.execute(`SELECT * FROM ${this.#table} WHERE id = ?`, [id]);
+    return rows[0] || null;
+  }
 
+  async update(id, data) {
+    const fields = Object.keys(data);
+    this.#assertFields(fields);
+    const assignments = fields.map((field) => `${field} = ?`).join(', ');
+    const [result] = await this.#dbConn.execute(
+      `UPDATE ${this.#table} SET ${assignments} WHERE id = ?`,
+      [...fields.map((field) => data[field]), id],
+    );
+    return result.affectedRows > 0;
+  }
+
+  async delete(id) {
+    const [result] = await this.#dbConn.execute(`DELETE FROM ${this.#table} WHERE id = ?`, [id]);
+    return result.affectedRows > 0;
+  }
 }
