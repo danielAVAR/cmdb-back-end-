@@ -28,6 +28,9 @@ if (isServerError) {
     if (err.code === 'ER_DUP_ENTRY') {
         return res.status(409).json({ success: false, status: 409, message: 'resource already exists', errors: [] });
     }
+    if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+        return res.status(409).json({ success: false, status: 409, message: 'resource is in use', errors: [] });
+    }
 
     res.status(status).json({
     success: false,
