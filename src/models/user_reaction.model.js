@@ -1,6 +1,6 @@
 import BaseModel from './base.model.js';
 
-export class user_reaction extends BaseModel{
+export class UserReactionModel extends BaseModel {
   constructor( dbConnection ){
     super( 'user_reactions', dbConnection );
   }

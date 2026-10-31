@@ -1,6 +1,6 @@
 import BaseModel from './base.model.js';
 
-export class review extends BaseModel{
+export class ReviewModel extends BaseModel {
   constructor( dbConnection ){
     super( 'reviews', dbConnection );
   }

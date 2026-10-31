@@ -1,6 +1,6 @@
 import BaseModel from './base.model.js';
 
-export class movie extends BaseModel{
+export class MovieModel extends BaseModel {
   constructor( dbConnection ){
     super( 'movies', dbConnection );
   }

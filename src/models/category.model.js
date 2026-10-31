@@ -1,6 +1,6 @@
 import BaseModel from './base.model.js';
 
-export class catagories extends BaseModel{
+export class CategoriesModel extends BaseModel {
   constructor( dbConnection ){
     super( 'categories', dbConnection );
   }
