@@ -2,6 +2,7 @@ import db from '../config/db.js';
 import MovieDto from '../dtos/movie.dto.js';
 import { ApiError } from '../middlewares/error.middleware.js';
 import RankingService from './ranking.service.js';
+import { MOVIE_STATUS } from '../utils/constants.js';
 
 export default class MoviesService {
   constructor() {
@@ -25,14 +26,14 @@ export default class MoviesService {
     }
     const [rows] = await db.execute(
       `SELECT m.*, CASE WHEN m.rating_count = 0 THEN 0 ELSE m.rating_sum / m.rating_count END AS average_rating
-       FROM movies m WHERE m.status = 'approved' ${categoryFilter} ORDER BY ${orderBy}`,
-      values,
+       FROM movies m WHERE m.status = ? ${categoryFilter} ORDER BY ${orderBy}`,
+      [MOVIE_STATUS.APPROVED, ...values],
     );
     return rows;
   }
 
   async listPending() {
-    const [rows] = await db.query("SELECT * FROM movies WHERE status = 'pending' ORDER BY created_at ASC");
+    const [rows] = await db.execute('SELECT * FROM movies WHERE status = ? ORDER BY created_at ASC', [MOVIE_STATUS.PENDING]);
     return rows;
   }
 
@@ -40,7 +41,7 @@ export default class MoviesService {
     const [rows] = await db.execute('SELECT * FROM movies WHERE id = ?', [id]);
     const movie = rows[0];
     if (!movie) throw new ApiError(404, 'Movie not found');
-    if (movie.status !== 'approved' && !viewer?.administrator && Number(viewer?.id) !== movie.created_by) {
+    if (movie.status !== MOVIE_STATUS.APPROVED && !viewer?.administrator && Number(viewer?.id) !== movie.created_by) {
       throw new ApiError(404, 'Movie not found');
     }
 
@@ -132,7 +133,7 @@ export default class MoviesService {
   async approve(id) {
     const [rows] = await db.execute('SELECT id FROM movies WHERE id = ?', [id]);
     if (!rows[0]) throw new ApiError(404, 'Movie not found');
-    await db.execute("UPDATE movies SET status = 'approved' WHERE id = ?", [id]);
+    await db.execute('UPDATE movies SET status = ? WHERE id = ?', [MOVIE_STATUS.APPROVED, id]);
     return this.get(id, { administrator: true });
   }
 

@@ -1,4 +1,5 @@
 import { body, param, query } from 'express-validator';
+import { REACTION_TYPES } from '../utils/constants.js';
 
 export const reviewIdValidator = [param('id').isInt({ min: 1 }).withMessage('id must be a positive integer')];
 export const listReviewsValidator = [query('movieId').optional().isInt({ min: 1 })];
@@ -18,5 +19,5 @@ export const updateReviewValidator = [
 ];
 export const reactionValidator = [
   ...reviewIdValidator,
-  body('reaction').isIn(['like', 'dislike']).withMessage('reaction must be like or dislike'),
+  body('reaction').isIn(Object.values(REACTION_TYPES)).withMessage('reaction must be like or dislike'),
 ];

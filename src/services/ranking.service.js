@@ -1,4 +1,5 @@
 import db from '../config/db.js';
+import { MOVIE_STATUS } from '../utils/constants.js';
 
 export default class RankingService {
   async list({ categoryId } = {}) {
@@ -19,9 +20,9 @@ export default class RankingService {
          SELECT movie_id, SUM((likes - dislikes) * EXP(-GREATEST(DATEDIFF(CURRENT_DATE, DATE(created_at)), 0) / 180)) AS engagement
          FROM reviews GROUP BY movie_id
        ) rs ON rs.movie_id = m.id
-       WHERE m.status = 'approved' ${categoryFilter}
+       WHERE m.status = ? ${categoryFilter}
        ORDER BY ranking_score DESC, m.rating_count DESC, m.movie_name ASC`,
-      values,
+      [MOVIE_STATUS.APPROVED, ...values],
     );
     return rows;
   }
