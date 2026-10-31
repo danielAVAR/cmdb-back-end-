@@ -3,6 +3,7 @@ import cors from 'cors';
 import passport from 'passport';
 import swaggerUi from 'swagger-ui-express';
 import 'dotenv/config';
+import './config/passport.js';
 
 import swaggerSpec from './config/swagger.js';
 import general from './middlewares/rateLimit.middleware.js';

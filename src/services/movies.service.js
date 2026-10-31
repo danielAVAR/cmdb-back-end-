@@ -1,11 +1,16 @@
 import db from '../config/db.js';
 import MovieDto from '../dtos/movie.dto.js';
 import { ApiError } from '../middlewares/error.middleware.js';
+import RankingService from './ranking.service.js';
 
 export default class MoviesService {
+  constructor() {
+    this.rankingService = new RankingService();
+  }
+
   async list({ categoryId, sort = 'ranking' } = {}) {
+    if (sort === 'ranking') return this.rankingService.list({ categoryId });
     const orderBy = {
-      ranking: 'average_rating DESC, rating_count DESC',
       popular: 'rating_count DESC, average_rating DESC',
       newest: 'created_at DESC',
       title: 'movie_name ASC',
