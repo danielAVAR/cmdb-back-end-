@@ -1,65 +1,91 @@
-# cmdb-back-end
-The_Carlos_Movie_Data_Base_back_end
+# Carlos Movie Database (CMDB)
 
+API para descubrir películas, anime y series geek, publicar reseñas, reaccionar a reseñas y consultar un ranking. El backend usa Node.js, Express y MySQL. El frontend se desarrolla en un repositorio independiente.
 
+## Requisitos
 
-## Arquitectura:
+- Node.js 20 o posterior y npm.
+- MySQL 8 o posterior.
 
+## Instalación y ejecución
+
+1. Instala dependencias con `npm ci`.
+2. Copia `.env.example` a `.env` y configura la conexión a MySQL y un secreto JWT aleatorio.
+3. Crea las tablas ejecutando `mysql -u <usuario> -p < sql/schema.sql`.
+4. Inicia el servidor con `npm run dev`.
+
+La API queda disponible en `http://localhost:3000/api/v1` y Swagger UI en `http://localhost:3000/api-docs`.
+
+## Variables de entorno
+
+| Variable | Uso |
+| --- | --- |
+| `APP_PORT` | Puerto HTTP; por defecto `3000`. |
+| `FRONTEND_URL` | Origen permitido por CORS, por ejemplo `http://localhost:5500`. |
+| `DB_HOST`, `DB_PORT` | Dirección y puerto MySQL. |
+| `DB_NAME` | Base de datos; por defecto `cmdb`. |
+| `DB_USER`, `DB_PASSWORD` | Credenciales MySQL. |
+| `DB_CONNECTION_LIMIT` | Máximo de conexiones del pool. |
+| `JWT_SECRET` | Secreto largo y aleatorio para firmar tokens. |
+| `JWT_EXPIRES_IN` | Vigencia del token, por ejemplo `1h` o `7d`. |
+
+No subas `.env` al repositorio.
+
+## Autenticación y permisos
+
+El registro crea usuarios normales. El administrador se representa mediante `users.administrator`; no existe un endpoint público para elevar ese permiso. Para probar endpoints administrativos, cambia el valor de ese campo directamente en una base de datos local de desarrollo. El login devuelve un JWT; envíalo como `Authorization: Bearer <token>`.
+
+Las películas nuevas quedan `pending`. Un administrador puede listarlas en `GET /movies/pending` y aprobarlas con `PATCH /movies/:id/approve`. Los usuarios autenticados pueden proponer películas, pero solo quien la creó o un administrador puede editarla o borrarla.
+
+## Endpoints principales
+
+Todos los endpoints están documentados y se pueden probar en Swagger UI.
+
+| Método | Ruta | Acceso | Acción |
+| --- | --- | --- | --- |
+| `POST` | `/auth/register` | Público | Registrar usuario. |
+| `POST` | `/auth/login` | Público | Iniciar sesión y obtener JWT. |
+| `GET` | `/auth/me` | JWT | Consultar el usuario autenticado. |
+| `GET`, `GET /:id` | `/categories` | Público | Listar y consultar categorías. |
+| `POST`, `PUT /:id`, `DELETE /:id` | `/categories` | Administrador | Administrar categorías. |
+| `GET` | `/movies?sort=ranking&categoryId=1` | Público | Listar películas aprobadas y filtrar/ordenar. |
+| `GET /:id` | `/movies` | Público | Consultar detalle, categorías, reparto, dirección y reseñas. |
+| `POST`, `PUT /:id`, `DELETE /:id` | `/movies` | JWT | Proponer/editar/eliminar una película según permisos. |
+| `GET /pending`, `PATCH /:id/approve` | `/movies` | Administrador | Revisar y aprobar propuestas. |
+| `GET /?movieId=1`, `GET /:id` | `/reviews` | Público | Consultar reseñas. |
+| `POST`, `PUT /:id`, `DELETE /:id` | `/reviews` | JWT | Crear y administrar reseñas propias. |
+| `PUT /:id/reaction`, `DELETE /:id/reaction` | `/reviews` | JWT | Dar/quitar like o dislike a reseñas ajenas. |
+| `GET` | `/version` | Público | Consultar versión de la API. |
+
+Ejemplo de registro:
+
+```http
+POST /api/v1/auth/register
+Content-Type: application/json
+
+{"username":"ana","email":"ana@example.com","password":"una-clave-segura"}
 ```
-cmdb-back-end/
-├── package.json
-├── package-lock.json
-├── .env                      # Credenciales reales (ignorado en Git)
-├── .env.example              # Plantilla con los mismos nombres, sin valores
-├── .gitignore                # node_modules/ y .env
-├── README.md
-├── sql/
-│   └── schema.sql            # Creación de la base de datos y tablas
-└── src/
-    ├── server.js             # Carga dotenv y arranca el servidor
-    ├── app.js                # Configura Express: cors, json, rate limit, rutas, swagger, errores
-    ├── config/
-    │   ├── db.js             # Pool de mysql2
-    │   ├── passport.js       # Estrategia JWT
-    │   └── swagger.js        # Carga la documentación OpenAPI
-    ├── utils/
-    │   ├── ApiError.js       # Error con código HTTP y mensaje
-    │   └── constants.js      # ROLES, MOVIE_STATUS, VOTE_TYPES
-    ├── models/               # Consultas SQL por tabla (sin ORM)
-    │   ├── user.model.js
-    │   ├── category.model.js
-    │   ├── movie.model.js
-    │   ├── review.model.js
-    │   └── vote.model.js
-    ├── services/             # Lógica de negocio y transacciones
-    │   ├── auth.service.js
-    │   ├── categories.service.js
-    │   ├── movies.service.js
-    │   ├── reviews.service.js    # Crea reseña con rating inicial (transacción)
-    │   ├── votes.service.js      # Likes y dislikes (transacción)
-    │   └── ranking.service.js    # Cálculo del ranking ponderado
-    ├── validators/           # Reglas de express-validator
-    │   ├── auth.validator.js
-    │   ├── categories.validator.js
-    │   ├── movies.validator.js
-    │   └── reviews.validator.js
-    ├── middlewares/
-    │   ├── auth.middleware.js       # Exige JWT válido (passport-jwt)
-    │   ├── role.middleware.js       # requireRole('admin') → 403 si no aplica
-    │   ├── validate.middleware.js   # Revisa resultados de express-validator → 400
-    │   ├── rateLimit.middleware.js  # Límites generales y más estrictos para login
-    │   ├── notFound.middleware.js   # 404 para rutas inexistentes
-    │   └── error.middleware.js      # Manejo centralizado (ApiError, ER_DUP_ENTRY → 409)
-    ├── controllers/          # Leen req, llaman al service y responden
-    │   ├── auth.controller.js
-    │   ├── categories.controller.js
-    │   ├── movies.controller.js
-    │   └── reviews.controller.js
-    └── routes/               # URLs y middlewares por endpoint
-        ├── index.js          # Monta todo bajo /api/v1
-        ├── auth.routes.js
-        ├── categories.routes.js
-        ├── movies.routes.js
-        └── reviews.routes.js
 
+Ejemplo de propuesta de película (requiere JWT):
+
+```json
+{
+  "movieName": "Ejemplo",
+  "overview": "Descripción de la película.",
+  "releaseYear": 2025,
+  "categoryIds": [1],
+  "imageUrl": null
+}
 ```
+
+## Frontend
+
+El frontend independiente se construye con HTML, CSS y JavaScript sin framework. Su URL de repositorio todavía no está definida; agréguese aquí cuando exista.
+
+## Estructura
+
+La documentación en español de cada carpeta está junto a sus archivos, en `README.md` dentro de la carpeta correspondiente.
+
+## Licencia
+
+ISC.
