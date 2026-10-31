@@ -4,7 +4,7 @@ import { ApiError } from '../middlewares/error.middleware.js';
 
 export default class VotesService {
   async setReaction(reviewId, userId, reaction) {
-    const dto = new UserReactionDto({ reviewId, reaction });
+    const dto = new UserReactionDto({ userId, reviewId, reaction });
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();

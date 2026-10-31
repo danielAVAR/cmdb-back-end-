@@ -1,5 +1,6 @@
 import db from '../config/db.js';
 import MovieDto from '../dtos/movie.dto.js';
+import MovieCategoryDto from '../dtos/movie-category.dto.js';
 import { ApiError } from '../middlewares/error.middleware.js';
 import RankingService from './ranking.service.js';
 import { MOVIE_STATUS } from '../utils/constants.js';
@@ -79,7 +80,8 @@ export default class MoviesService {
           dto.budget ?? null, dto.grossWorldwide ?? null, userId],
       );
       for (const categoryId of categoryIds) {
-        await connection.execute('INSERT INTO movie_categories (movie_id, category_id) VALUES (?, ?)', [result.insertId, categoryId]);
+        const relation = new MovieCategoryDto({ movieId: result.insertId, categoryId });
+        await connection.execute('INSERT INTO movie_categories (movie_id, category_id) VALUES (?, ?)', [relation.movieId, relation.categoryId]);
       }
       await connection.commit();
       return this.get(result.insertId, { id: userId });
@@ -117,7 +119,8 @@ export default class MoviesService {
       if (data.categoryIds !== undefined) {
         await connection.execute('DELETE FROM movie_categories WHERE movie_id = ?', [id]);
         for (const categoryId of [...new Set(data.categoryIds)]) {
-          await connection.execute('INSERT INTO movie_categories (movie_id, category_id) VALUES (?, ?)', [id, categoryId]);
+          const relation = new MovieCategoryDto({ movieId: id, categoryId });
+          await connection.execute('INSERT INTO movie_categories (movie_id, category_id) VALUES (?, ?)', [relation.movieId, relation.categoryId]);
         }
       }
       await connection.commit();

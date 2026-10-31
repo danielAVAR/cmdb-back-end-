@@ -1,11 +1,13 @@
 import db from '../config/db.js';
 import ActorDto from '../dtos/actor.dto.js';
 import DirectorDto from '../dtos/director.dto.js';
+import MovieActorDto from '../dtos/movie-actor.dto.js';
+import MovieDirectorDto from '../dtos/movie-director.dto.js';
 import { ApiError } from '../middlewares/error.middleware.js';
 
 const PEOPLE = Object.freeze({
-  actors: { table: 'actors', relation: 'movie_actors', foreignKey: 'actor_id', nameColumn: 'actor_name', Dto: ActorDto },
-  directors: { table: 'directors', relation: 'movie_directors', foreignKey: 'director_id', nameColumn: 'director_name', Dto: DirectorDto },
+  actors: { table: 'actors', relation: 'movie_actors', foreignKey: 'actor_id', Dto: ActorDto, LinkDto: MovieActorDto, personField: 'actorId' },
+  directors: { table: 'directors', relation: 'movie_directors', foreignKey: 'director_id', Dto: DirectorDto, LinkDto: MovieDirectorDto, personField: 'directorId' },
 });
 
 export default class PeopleService {
@@ -64,7 +66,7 @@ export default class PeopleService {
   }
 
   async replaceMoviePeople(type, movieId, personIds) {
-    const { relation, foreignKey } = this.#config(type);
+    const { relation, foreignKey, LinkDto, personField } = this.#config(type);
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
@@ -72,7 +74,8 @@ export default class PeopleService {
       if (!movies[0]) throw new ApiError(404, 'Movie not found');
       await connection.execute(`DELETE FROM ${relation} WHERE movie_id = ?`, [movieId]);
       for (const personId of [...new Set(personIds)]) {
-        await connection.execute(`INSERT INTO ${relation} (movie_id, ${foreignKey}) VALUES (?, ?)`, [movieId, personId]);
+        const link = new LinkDto({ movieId, [personField]: personId });
+        await connection.execute(`INSERT INTO ${relation} (movie_id, ${foreignKey}) VALUES (?, ?)`, [link.movieId, link[personField]]);
       }
       await connection.commit();
     } catch (error) {

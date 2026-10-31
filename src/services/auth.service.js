@@ -2,13 +2,15 @@ import bcrypt from 'bcrypt';
 import db from '../config/db.js';
 import { signToken } from '../utils/token.js';
 import { ApiError } from '../middlewares/error.middleware.js';
+import UserDto from '../dtos/user.dto.js';
 
 export default class AuthService {
-  async register({ username, email, password }) {
-    const passwordHash = await bcrypt.hash(password, 12);
+  async register(data) {
+    const dto = new UserDto(data);
+    const passwordHash = await bcrypt.hash(dto.password, 12);
     const [result] = await db.execute(
       'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
-      [username, email, passwordHash],
+      [dto.username, dto.email, passwordHash],
     );
     const [rows] = await db.execute(
       'SELECT id, username, email, administrator, created_at FROM users WHERE id = ?',

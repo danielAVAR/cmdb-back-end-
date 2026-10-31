@@ -17,7 +17,7 @@ export default class RankingService {
              ELSE 2 * COALESCE(rs.engagement, 0) / (5 + ABS(COALESCE(rs.engagement, 0))) END AS ranking_score
        FROM movies m
        LEFT JOIN (
-         SELECT movie_id, SUM((likes - dislikes) * EXP(-GREATEST(DATEDIFF(CURRENT_DATE, DATE(created_at)), 0) / 180)) AS engagement
+         SELECT movie_id, SUM((CAST(likes AS SIGNED) - CAST(dislikes AS SIGNED)) * EXP(-GREATEST(DATEDIFF(CURRENT_DATE, DATE(created_at)), 0) / 180)) AS engagement
          FROM reviews GROUP BY movie_id
        ) rs ON rs.movie_id = m.id
        WHERE m.status = ? ${categoryFilter}

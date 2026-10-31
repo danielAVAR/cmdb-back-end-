@@ -70,7 +70,7 @@ export default class ReviewsService {
         await connection.execute(`UPDATE reviews SET ${columns.map((field) => `${field} = ?`).join(', ')} WHERE id = ?`, [...Object.values(fields), id]);
       }
       if (fields.rating !== undefined && Number(fields.rating) !== old.rating) {
-        await connection.execute('UPDATE movies SET rating_sum = rating_sum + ? WHERE id = ?', [Number(fields.rating) - old.rating, old.movie_id]);
+        await connection.execute('UPDATE movies SET rating_sum = rating_sum + ? - ? WHERE id = ?', [Number(fields.rating), old.rating, old.movie_id]);
       }
       await connection.commit();
     } catch (error) {
