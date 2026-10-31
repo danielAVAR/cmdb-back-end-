@@ -3,12 +3,13 @@ import cors from 'cors';
 import passport from 'passport';
 import swaggerUi from 'swagger-ui-express';
 import 'dotenv/config';
+import './config/passport.js';
 
 import swaggerSpec from './config/swagger.js';
-import general from './middlewares/rateLimit.middleware.js';
+import { general } from './middlewares/rateLimit.middleware.js';
 import apiRoutes from './routes/index.js';
 import notFound from './middlewares/notFound.middleware.js';
-import errorHandler from './middlewares/error.middleware.js';
+import { errorHandler } from './middlewares/error.middleware.js';
 
 const app = express();
 
