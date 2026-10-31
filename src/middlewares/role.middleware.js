@@ -7,7 +7,8 @@ if (!req.user) {
     return next(new ApiError(401, 'unauthorized'));
 }
 
-if (!allowedRoles.includes(req.user.role)) {
+const userRoles = req.user.administrator ? ['administrator', 'user'] : ['user'];
+if (!allowedRoles.some((role) => userRoles.includes(role))) {
     return next(new ApiError(403, 'forbidden'));
 }
 
