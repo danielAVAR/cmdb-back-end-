@@ -1,15 +1,14 @@
-import app from './app.js'
+import 'dotenv/config';
+import app from './app.js';
+import db from './config/db.js';
 
-try{
-    // Verifica la conexion con MySQL
-    const connection = await pool.getConnection();
-    connection.release();
+const port = Number(process.env.APP_PORT || 3000);
 
-    app.listen(PORT, () => {
-        console.log(`API ready in http://localhost${PORT}`)
-    });
-} catch (error){
-    console.error('MySQL not connected:', error.message);
-    await pool.end();
-    process.exit(1);
+try {
+  await db.query('SELECT 1');
+  app.listen(port, () => console.log(`CMDB API disponible en http://localhost:${port}`));
+} catch (error) {
+  console.error('No fue posible conectar con MySQL:', error.message);
+  await db.end();
+  process.exit(1);
 }

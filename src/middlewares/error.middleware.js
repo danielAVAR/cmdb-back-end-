@@ -17,7 +17,7 @@ export const errorHandler = (err, req, res, next) => {
     }
 
 // si no viene un estado definido se asume error interno
-const status = err.status || err.statusCode || 500;
+    const status = err.status || err.statusCode || 500;
 const isServerError = status >= 500;
 
 // el detalle tecnico solo se registra en el servidor
@@ -25,10 +25,14 @@ if (isServerError) {
     console.error(err);
 }
 
+    if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ success: false, status: 409, message: 'resource already exists', errors: [] });
+    }
+
     res.status(status).json({
     success: false,
     status,
-    message: isServerError ? 'internal server error' : err.message,
+        message: isServerError ? 'internal server error' : err.message,
     errors: err.errors || [],
     });
 };

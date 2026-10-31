@@ -16,8 +16,8 @@ passport.use(
         secretOrKey: process.env.JWT_SECRET,
     },
     (payload, done) => {
-        // el contenido del token queda disponible como usuario autenticado
-        return done(null, payload);
+        // La identidad del token se normaliza para usar req.user.id.
+        return done(null, { id: Number(payload.sub), administrator: Boolean(payload.administrator) });
     }
 )
 );
