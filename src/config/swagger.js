@@ -23,6 +23,7 @@ const swaggerSpec = {
         { name: 'Categorías', description: 'Lectura pública y administración restringida.' },
         { name: 'Películas', description: 'Catálogo, propuestas y aprobación.' },
         { name: 'Reseñas', description: 'Reseñas y reacciones de usuarios.' },
+        { name: 'Personas', description: 'Actores, directores y sus relaciones con películas.' },
         { name: 'Sistema', description: 'Información de la API.' },
     ],
     paths: {
@@ -124,6 +125,38 @@ const swaggerSpec = {
             },
             delete: { tags: ['Reseñas'], summary: 'Quitar reacción propia', security: [{ bearerAuth: [] }], responses: { 204: { description: 'Reacción eliminada y contador actualizado.' }, 404: { description: 'Reacción no encontrada.' } } },
         },
+        '/people/actors': {
+            get: { tags: ['Personas'], summary: 'Listar actores', responses: { 200: { description: 'Actores.' } } },
+            post: {
+                tags: ['Personas'], summary: 'Crear actor (administrador)', security: [{ bearerAuth: [] }],
+                requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ActorInput' } } } },
+                responses: { 201: { description: 'Actor creado.' }, 403: { description: 'Se requiere administrador.' } },
+            },
+        },
+        '/people/actors/{id}': {
+            parameters: [{ $ref: '#/components/parameters/Id' }],
+            get: { tags: ['Personas'], summary: 'Consultar actor', responses: { 200: { description: 'Actor.' }, 404: { description: 'No encontrado.' } } },
+            put: { tags: ['Personas'], summary: 'Actualizar actor (administrador)', security: [{ bearerAuth: [] }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ActorUpdateInput' } } } }, responses: { 200: { description: 'Actor actualizado.' }, 403: { description: 'Se requiere administrador.' } } },
+            delete: { tags: ['Personas'], summary: 'Eliminar actor (administrador)', security: [{ bearerAuth: [] }], responses: { 204: { description: 'Actor eliminado.' }, 409: { description: 'El actor está asociado a películas.' } } },
+        },
+        '/people/directors': {
+            get: { tags: ['Personas'], summary: 'Listar directores', responses: { 200: { description: 'Directores.' } } },
+            post: { tags: ['Personas'], summary: 'Crear director (administrador)', security: [{ bearerAuth: [] }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/DirectorInput' } } } }, responses: { 201: { description: 'Director creado.' }, 403: { description: 'Se requiere administrador.' } } },
+        },
+        '/people/directors/{id}': {
+            parameters: [{ $ref: '#/components/parameters/Id' }],
+            get: { tags: ['Personas'], summary: 'Consultar director', responses: { 200: { description: 'Director.' }, 404: { description: 'No encontrado.' } } },
+            put: { tags: ['Personas'], summary: 'Actualizar director (administrador)', security: [{ bearerAuth: [] }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/DirectorUpdateInput' } } } }, responses: { 200: { description: 'Director actualizado.' }, 403: { description: 'Se requiere administrador.' } } },
+            delete: { tags: ['Personas'], summary: 'Eliminar director (administrador)', security: [{ bearerAuth: [] }], responses: { 204: { description: 'Director eliminado.' }, 409: { description: 'El director está asociado a películas.' } } },
+        },
+        '/people/movies/{movieId}/actors': {
+            parameters: [{ name: 'movieId', in: 'path', required: true, schema: { type: 'integer', minimum: 1 } }],
+            put: { tags: ['Personas'], summary: 'Reemplazar el reparto de una película (administrador)', security: [{ bearerAuth: [] }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ActorLinksInput' } } } }, responses: { 200: { description: 'Relaciones de actores actualizadas.' }, 403: { description: 'Se requiere administrador.' }, 404: { description: 'Película o actor no encontrado.' } } },
+        },
+        '/people/movies/{movieId}/directors': {
+            parameters: [{ name: 'movieId', in: 'path', required: true, schema: { type: 'integer', minimum: 1 } }],
+            put: { tags: ['Personas'], summary: 'Reemplazar directores de una película (administrador)', security: [{ bearerAuth: [] }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/DirectorLinksInput' } } } }, responses: { 200: { description: 'Relaciones de directores actualizadas.' }, 403: { description: 'Se requiere administrador.' }, 404: { description: 'Película o director no encontrado.' } } },
+        },
         '/version': {
             get: { tags: ['Sistema'], summary: 'Consultar versión semver', responses: { 200: { description: 'Versión de package.json.' } } },
         },
@@ -141,6 +174,12 @@ const swaggerSpec = {
             ReviewInput: { type: 'object', required: ['movieId', 'title', 'comment', 'rating'], properties: { movieId: { type: 'integer', minimum: 1 }, title: { type: 'string', maxLength: 150 }, comment: { type: 'string', maxLength: 500 }, rating: { type: 'integer', minimum: 1, maximum: 10 } } },
             ReviewUpdateInput: { type: 'object', minProperties: 1, properties: { title: { type: 'string', maxLength: 150 }, comment: { type: 'string', maxLength: 500 }, rating: { type: 'integer', minimum: 1, maximum: 10 } } },
             ReactionInput: { type: 'object', required: ['reaction'], properties: { reaction: { type: 'string', enum: ['like', 'dislike'] } } },
+            ActorInput: { type: 'object', required: ['actorName'], properties: { actorName: { type: 'string', maxLength: 150 }, biography: { type: 'string', maxLength: 500, nullable: true }, birthdate: { type: 'string', format: 'date', nullable: true } } },
+            ActorUpdateInput: { type: 'object', minProperties: 1, properties: { actorName: { type: 'string', maxLength: 150 }, biography: { type: 'string', maxLength: 500, nullable: true }, birthdate: { type: 'string', format: 'date', nullable: true } } },
+            DirectorInput: { type: 'object', required: ['directorName'], properties: { directorName: { type: 'string', maxLength: 150 }, biography: { type: 'string', maxLength: 500, nullable: true } } },
+            DirectorUpdateInput: { type: 'object', minProperties: 1, properties: { directorName: { type: 'string', maxLength: 150 }, biography: { type: 'string', maxLength: 500, nullable: true } } },
+            ActorLinksInput: { type: 'object', required: ['actorIds'], properties: { actorIds: { type: 'array', items: { type: 'integer', minimum: 1 } } } },
+            DirectorLinksInput: { type: 'object', required: ['directorIds'], properties: { directorIds: { type: 'array', items: { type: 'integer', minimum: 1 } } } },
         },
         securitySchemes: {
             bearerAuth: {

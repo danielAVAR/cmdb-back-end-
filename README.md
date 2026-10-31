@@ -55,6 +55,9 @@ Todos los endpoints están documentados y se pueden probar en Swagger UI.
 | `GET /?movieId=1`, `GET /:id` | `/reviews` | Público | Consultar reseñas. |
 | `POST`, `PUT /:id`, `DELETE /:id` | `/reviews` | JWT | Crear y administrar reseñas propias. |
 | `PUT /:id/reaction`, `DELETE /:id/reaction` | `/reviews` | JWT | Dar/quitar like o dislike a reseñas ajenas. |
+| `GET`, `GET /:id` | `/people/actors`, `/people/directors` | Público | Consultar actores y directores. |
+| `POST`, `PUT /:id`, `DELETE /:id` | `/people/actors`, `/people/directors` | Administrador | Administrar personas del catálogo. |
+| `PUT /movies/:movieId/actors`, `PUT /movies/:movieId/directors` | `/people` | Administrador | Reemplazar las relaciones de reparto y dirección. |
 | `GET` | `/version` | Público | Consultar versión de la API. |
 
 Ejemplo de registro:
