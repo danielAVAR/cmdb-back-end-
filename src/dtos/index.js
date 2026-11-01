@@ -1,0 +1,10 @@
+export { default as UserDto } from './user.dto.js';
+export { default as CategoryDto } from './category.dto.js';
+export { default as MovieDto } from './movie.dto.js';
+export { default as ReviewDto } from './review.dto.js';
+export { default as UserReactionDto } from './user-reaction.dto.js';
+export { default as ActorDto } from './actor.dto.js';
+export { default as DirectorDto } from './director.dto.js';
+export { default as MovieCategoryDto } from './movie-category.dto.js';
+export { default as MovieActorDto } from './movie-actor.dto.js';
+export { default as MovieDirectorDto } from './movie-director.dto.js';
