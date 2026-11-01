@@ -10,6 +10,7 @@ const db = mysql.createPool({
   waitForConnections: true,
   connectionLimit: Number(process.env.DB_CONNECTION_LIMIT || 10),
   decimalNumbers: true,
+  ssl: process.env.DB_CA ? { ca: process.env.DB_CA.replace(/\\n/g, '\n') } : undefined,
 });
 
 export default db;
