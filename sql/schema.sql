@@ -3,7 +3,7 @@ CREATE DATABASE IF NOT EXISTS cmdb;
 USE cmdb;
 
 
--- Usuarios
+-- bloque 1
 CREATE TABLE users (
   id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(50) NOT NULL UNIQUE,
@@ -14,13 +14,13 @@ CREATE TABLE users (
 ) ENGINE=InnoDB;
 
 
--- Categorías
+-- bloque 2
 CREATE TABLE categories (
   id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   category_name VARCHAR(80) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
--- Películas
+-- bloque 3
 CREATE TABLE movies (
   id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   movie_name VARCHAR(100) NOT NULL UNIQUE,
@@ -38,7 +38,7 @@ CREATE TABLE movies (
   FOREIGN KEY (created_by) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
--- Reseñas
+-- bloque 4
 CREATE TABLE reviews (
   id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   user_id INT UNSIGNED NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE reviews (
   FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 5. Reacciones likes y dislikes
+-- bloque 5
 CREATE TABLE user_reactions (
   user_id INT UNSIGNED NOT NULL,
   review_id INT UNSIGNED NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE user_reactions (
   FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Relación muchos a muchos películas y categorías
+-- bloque 6
 CREATE TABLE movie_categories (
   movie_id INT UNSIGNED NOT NULL,
   category_id INT UNSIGNED NOT NULL,
