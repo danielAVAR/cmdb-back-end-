@@ -20,3 +20,17 @@ const auth = (req, res, next) => {
 };
 
 export default auth;
+
+// reads the token when present but never rejects: used by public routes that
+// show more to the owner or an administrator (e.g. a pending movie)
+export const optionalAuth = (req, res, next) => {
+    passport.authenticate('jwt', { session: false }, (err, user) => {
+        if (err) {
+            return next(err);
+        }
+        if (user) {
+            req.user = user;
+        }
+        next();
+    })(req, res, next);
+};

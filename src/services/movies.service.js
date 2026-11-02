@@ -63,7 +63,8 @@ export default class MoviesService {
        FROM reviews r JOIN users u ON u.id = r.user_id
        WHERE r.movie_id = ? ORDER BY r.created_at DESC`, [id],
     );
-    return { ...movie, categories, actors, directors, reviews };
+    const averageRating = movie.rating_count === 0 ? 0 : movie.rating_sum / movie.rating_count;
+    return { ...movie, average_rating: averageRating, categories, actors, directors, reviews };
   }
 
   async create(data, userId) {
