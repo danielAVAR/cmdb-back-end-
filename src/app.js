@@ -13,6 +13,10 @@ import { errorHandler } from './middlewares/error.middleware.js';
 
 const app = express();
 
+// The app runs behind one reverse proxy in production (Render), which supplies
+// X-Forwarded-For. Trust that hop so rate limiting uses the originating IP.
+app.set('trust proxy', 1);
+
 const allowedOrigins = (process.env.FRONTEND_URL || '')
   .split(',')
   .map((origin) => origin.trim())
