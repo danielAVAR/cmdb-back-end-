@@ -1,10 +1,7 @@
 // carga el .env antes de leer APP_PORT
 import 'dotenv/config';
-import { createRequire } from 'node:module';
+import { apiVersion } from '../utils/version.js';
 
-// la version de la documentacion sale de package.json (HU-31)
-const require = createRequire(import.meta.url);
-const { version } = require('../../package.json');
 
 const port = process.env.APP_PORT || 3000;
 
@@ -12,7 +9,7 @@ const swaggerSpec = {
     openapi: '3.0.3',
     info: {
         title: 'CMDB API',
-        version,
+        version: apiVersion,
         description: 'API CMDB para usuarios, películas, categorías, reseñas, reacciones y ranking.',
     },
     servers: [
