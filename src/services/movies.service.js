@@ -9,12 +9,14 @@ export default class MoviesService {
     this.rankingService = new RankingService();
   }
 
+  // EXAMEN FUNCIOdN UNO ENCONTRAR categoria
   async list({ categoryId, sort = 'ranking' } = {}) {
     if (sort === 'ranking') return this.rankingService.list({ categoryId });
     const orderBy = {
       popular: 'rating_count DESC, average_rating DESC',
       newest: 'created_at DESC',
       title: 'movie_name ASC',
+
     }[sort];
     if (!orderBy) throw new ApiError(400, 'Unsupported sort order');
 
@@ -31,6 +33,7 @@ export default class MoviesService {
     );
     return rows;
   }
+
 
   async listPending() {
     const [rows] = await db.execute('SELECT * FROM movies WHERE status = ? ORDER BY created_at ASC', [MOVIE_STATUS.PENDING]);

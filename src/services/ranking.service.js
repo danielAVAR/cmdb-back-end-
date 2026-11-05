@@ -2,6 +2,7 @@ import db from '../config/db.js';
 import { MOVIE_STATUS } from '../utils/constants.js';
 
 export default class RankingService {
+
   async list({ categoryId } = {}) {
     const values = [];
     let categoryFilter = '';
@@ -9,6 +10,7 @@ export default class RankingService {
       categoryFilter = 'AND EXISTS (SELECT 1 FROM movie_categories mc WHERE mc.movie_id = m.id AND mc.category_id = ?)';
       values.push(categoryId);
     }
+    
     const [rows] = await db.execute(
       `SELECT m.*,
         CASE WHEN m.rating_count = 0 THEN 0 ELSE m.rating_sum / m.rating_count END AS average_rating,
