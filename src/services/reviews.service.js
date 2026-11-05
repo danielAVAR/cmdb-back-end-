@@ -39,6 +39,12 @@ export default class ReviewsService {
       );
       reviewId = result.insertId;
       await connection.execute('UPDATE movies SET rating_sum = rating_sum + ?, rating_count = rating_count + 1 WHERE id = ?', [dto.rating, dto.movieId]);
+      
+      await connection.execute(
+        'INSERT INTO historial (user_id, action_type, description, review_id) VALUES (?, ?, ?, ?)',
+        [userId, 'CREAR_RESEÑA', `Creó la reseña "${dto.title}"`, reviewId]
+      );
+
       await connection.commit();
     } catch (error) {
       await connection.rollback();
@@ -54,7 +60,7 @@ export default class ReviewsService {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
-      const [rows] = await connection.execute('SELECT user_id, movie_id, rating FROM reviews WHERE id = ? FOR UPDATE', [id]);
+      const [rows] = await connection.execute('SELECT user_id, movie_id, rating, title FROM reviews WHERE id = ? FOR UPDATE', [id]);
       const old = rows[0];
       if (!old) throw new ApiError(404, 'Review not found');
       if (!user.administrator && old.user_id !== Number(user.id)) throw new ApiError(403, 'You can only edit your own reviews');
@@ -72,6 +78,13 @@ export default class ReviewsService {
       if (fields.rating !== undefined && Number(fields.rating) !== old.rating) {
         await connection.execute('UPDATE movies SET rating_sum = rating_sum + ? WHERE id = ?', [Number(fields.rating) - old.rating, old.movie_id]);
       }
+
+      const targetUserId = user.id;
+      await connection.execute(
+        'INSERT INTO historial (user_id, action_type, description, review_id) VALUES (?, ?, ?, ?)',
+        [targetUserId, 'EDITAR_RESEÑA', `Editó la reseña "${old.title}"`, id]
+      );
+
       await connection.commit();
     } catch (error) {
       await connection.rollback();
@@ -86,12 +99,19 @@ export default class ReviewsService {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
-      const [rows] = await connection.execute('SELECT user_id, movie_id, rating FROM reviews WHERE id = ? FOR UPDATE', [id]);
+      const [rows] = await connection.execute('SELECT user_id, movie_id, rating, title FROM reviews WHERE id = ? FOR UPDATE', [id]);
       const review = rows[0];
       if (!review) throw new ApiError(404, 'Review not found');
       if (!user.administrator && review.user_id !== Number(user.id)) throw new ApiError(403, 'You can only delete your own reviews');
       await connection.execute('DELETE FROM reviews WHERE id = ?', [id]);
       await connection.execute('UPDATE movies SET rating_sum = rating_sum - ?, rating_count = rating_count - 1 WHERE id = ?', [review.rating, review.movie_id]);
+
+      const targetUserId = user.id;
+      await connection.execute(
+        'INSERT INTO historial (user_id, action_type, description, review_id) VALUES (?, ?, ?, ?)',
+        [targetUserId, 'ELIMINAR_RESEÑA', `Eliminó la reseña "${review.title}"`, id]
+      );
+
       await connection.commit();
     } catch (error) {
       await connection.rollback();

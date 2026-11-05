@@ -66,6 +66,18 @@ CREATE TABLE reviews (
   FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- historial de acciones del usuario
+CREATE TABLE historial (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  user_id INT UNSIGNED NOT NULL,
+  action_type VARCHAR(50) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  review_id INT UNSIGNED NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
 -- Reacciones likes y dislikes
 CREATE TABLE user_reactions (
   user_id INT UNSIGNED NOT NULL,
