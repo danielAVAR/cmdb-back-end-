@@ -9,7 +9,7 @@ export default class MoviesService {
     this.rankingService = new RankingService();
   }
 
-  // EXAMEN FUNCION UNO ENCONTRAR categoria
+  // EXAMEN FUNCIOdN UNO ENCONTRAR categoria
   async list({ categoryId, sort = 'ranking' } = {}) {
     if (sort === 'ranking') return this.rankingService.list({ categoryId });
     const orderBy = {
